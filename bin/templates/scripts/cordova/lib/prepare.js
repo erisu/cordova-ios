@@ -28,12 +28,14 @@ var plist = require('plist');
 var URL = require('url');
 var events = require('cordova-common').events;
 var xmlHelpers = require('cordova-common').xmlHelpers;
-var ConfigParser = require('cordova-common').ConfigParser;
 var CordovaError = require('cordova-common').CordovaError;
 var PlatformJson = require('cordova-common').PlatformJson;
 var PlatformMunger = require('cordova-common').ConfigChanges.PlatformMunger;
 var PluginInfoProvider = require('cordova-common').PluginInfoProvider;
 var FileUpdater = require('cordova-common').FileUpdater;
+
+const IosConfigParser = require('./config/IosConfigParser');
+
 var projectFile = require('./projectFile');
 
 // launch storyboard and related constants
@@ -81,7 +83,7 @@ module.exports.clean = function (options) {
         return Q();
     }
 
-    var projectConfig = new ConfigParser(this.locations.configXml);
+    const projectConfig = new IosConfigParser(this.locations.configXml);
 
     var self = this;
     return Q().then(function () {
@@ -120,7 +122,7 @@ function updateConfigFile (sourceConfig, configMunger, locations) {
 
     events.emit('verbose', 'Merging project\'s config.xml into platform-specific iOS config.xml');
     // Merge changes from app's config.xml into platform's one
-    var config = new ConfigParser(locations.configXml);
+    const config = new IosConfigParser(locations.configXml);
     xmlHelpers.mergeXml(sourceConfig.doc.getroot(),
         config.doc.getroot(), 'ios', /* clobber= */true);
 
