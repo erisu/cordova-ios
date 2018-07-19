@@ -18,7 +18,7 @@
  */
 
 'use strict';
-var fs = require('fs');
+let fs = require('fs');
 var os = require('os');
 var path = require('path');
 var shell = require('shelljs');
@@ -39,12 +39,13 @@ var iosPlatform = path.join(iosProject, 'platforms/ios');
 
 shell.config.silent = true;
 
-var ConfigParser = require('cordova-common').ConfigParser;
+// var ConfigParser = require('cordova-common').ConfigParser;
 
 // Create a real config object before mocking out everything.
-var cfg = new ConfigParser(path.join(FIXTURES, 'test-config.xml'));
-var cfg2 = new ConfigParser(path.join(FIXTURES, 'test-config-2.xml'));
-var cfg3 = new ConfigParser(path.join(FIXTURES, 'test-config-3.xml'));
+let IosConfigParser = rewire('../../../bin/templates/scripts/cordova/lib/config/IosConfigParser');
+const cfg = new IosConfigParser(path.join(FIXTURES, 'test-config.xml'));
+const cfg2 = new IosConfigParser(path.join(FIXTURES, 'test-config-2.xml'));
+const cfg3 = new IosConfigParser(path.join(FIXTURES, 'test-config-3.xml'));
 
 function wrapper (p, done, post) {
     p.then(post, function (err) {
@@ -265,7 +266,7 @@ describe('prepare', function () {
         describe('#platformHasLaunchStoryboardImages', function () {
             var platformHasLaunchStoryboardImages = prepare.__get__('platformHasLaunchStoryboardImages');
             var cfgs = ['none', 'legacy-only', 'modern-only', 'modern-and-legacy'].reduce(function (p, c) {
-                p[c] = new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml'));
+                p[c] = new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml'));
                 return p;
             }, {});
 
@@ -286,7 +287,7 @@ describe('prepare', function () {
         describe('#platformHasLegacyLaunchImages', function () {
             var platformHasLegacyLaunchImages = prepare.__get__('platformHasLegacyLaunchImages');
             var cfgs = ['none', 'legacy-only', 'modern-only', 'modern-and-legacy'].reduce(function (p, c) {
-                p[c] = new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml'));
+                p[c] = new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml'));
                 return p;
             }, {});
 
@@ -312,7 +313,7 @@ describe('prepare', function () {
             it('setup', function () {
                 cfgs = ['none', 'legacy-only', 'modern-only', 'modern-and-legacy'].reduce(function (p, c) {
                     p[c] = {
-                        config: new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml')),
+                        config: new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml')),
                         plist: plist.parse(fs.readFileSync(plistFile, 'utf8'))
                     };
                     return p;
@@ -386,7 +387,7 @@ describe('prepare', function () {
                 var project = {
                     root: iosProject,
                     locations: p.locations,
-                    projectConfig: new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', 'modern-only.xml'))
+                    projectConfig: new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', 'modern-only.xml'))
                 };
 
                 // copy the splash screen fixtures to the iOS project
@@ -435,7 +436,7 @@ describe('prepare', function () {
                 var project = {
                     root: iosProject,
                     locations: p.locations,
-                    projectConfig: new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', 'modern-only.xml'))
+                    projectConfig: new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', 'modern-only.xml'))
                 };
 
                 shell.cp('-rf', path.join(FIXTURES, 'launch-storyboard-support', 'res'), iosProject);
@@ -480,7 +481,7 @@ describe('prepare', function () {
             it('setup', function () {
                 cfgs = ['none', 'legacy-only', 'modern-only', 'modern-and-legacy'].reduce(function (p, c) {
                     p[c] = {
-                        config: new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml')),
+                        config: new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml')),
                         plist: plist.parse(fs.readFileSync(plistFile, 'utf8'))
                     };
                     return p;
@@ -522,7 +523,7 @@ describe('prepare', function () {
             it('setup', function () {
                 cfgs = ['legacy-only', 'modern-only'].reduce(function (p, c) {
                     p[c] = {
-                        config: new ConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml')),
+                        config: new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml')),
                         plist: plist.parse(fs.readFileSync(plistFile, 'utf8'))
                     };
                     return p;
@@ -763,15 +764,9 @@ describe('prepare', function () {
             });
         });
 
-        it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsInWebContent', function (done) {
-
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-arbitrary-loads-in-web-content="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
+        it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsInWebContent', (done) => {
+            let configXml = path.join(FIXTURES, 'prepare', 'NSAllowsArbitraryLoadsInWebContent.xml');
+            let my_config = new IosConfigParser(configXml);
 
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -784,14 +779,9 @@ describe('prepare', function () {
         });
 
         it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsForMedia set (fixed allows-arbitrary-loads-for-media)', function (done) {
+            let configXml = path.join(FIXTURES, 'prepare', 'NSAllowsArbitraryLoadsForMedia.true.xml');
+            let my_config = new IosConfigParser(configXml);
 
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-arbitrary-loads-for-media="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
                 expect(ats.NSAllowsArbitraryLoads).toEqual(true);
@@ -803,14 +793,9 @@ describe('prepare', function () {
         });
 
         it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsForMedia not set (fixed allows-arbitrary-loads-for-media)', function (done) {
+            let configXml = path.join(FIXTURES, 'prepare', 'NSAllowsArbitraryLoadsForMedia.false.xml');
+            let my_config = new IosConfigParser(configXml);
 
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-arbitrary-loads-for-media="false" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
                 expect(ats.NSAllowsArbitraryLoads).toEqual(true);
@@ -822,14 +807,9 @@ describe('prepare', function () {
         });
 
         it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsForMedia set (deprecated allows-arbitrary-loads-in-media)', function (done) {
+            let configXml = path.join(FIXTURES, 'prepare', 'NSAllowsArbitraryLoadsInMedia.true.xml');
+            let my_config = new IosConfigParser(configXml);
 
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-arbitrary-loads-in-media="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
                 expect(ats.NSAllowsArbitraryLoads).toEqual(true);
@@ -841,14 +821,9 @@ describe('prepare', function () {
         });
 
         it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsForMedia not set (deprecated allows-arbitrary-loads-in-media)', function (done) {
+            let configXml = path.join(FIXTURES, 'prepare', 'NSAllowsArbitraryLoadsInMedia.false.xml');
+            let my_config = new IosConfigParser(configXml);
 
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-arbitrary-loads-in-media="false" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
                 expect(ats.NSAllowsArbitraryLoads).toEqual(true);
@@ -860,14 +835,8 @@ describe('prepare', function () {
         });
 
         it('<access> - should handle wildcard, with NSAllowsLocalNetworking', function (done) {
-
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-local-networking="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
+            let configXml = path.join(FIXTURES, 'prepare', 'NSAllowsLocalNetworking.xml');
+            let my_config = new IosConfigParser(configXml);
 
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -880,14 +849,8 @@ describe('prepare', function () {
         });
 
         it('<access> - should handle wildcard, with NSAllowsArbitraryLoadsInWebContent, NSAllowsArbitraryLoadsForMedia, NSAllowsLocalNetworking', function (done) {
-
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="*" allows-arbitrary-loads-in-web-content="true" allows-arbitrary-loads-in-media="true" allows-local-networking="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
+            let configXml = path.join(FIXTURES, 'prepare', 'WildcardForAllNS.xml');
+            let my_config = new IosConfigParser(configXml);
 
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -899,14 +862,8 @@ describe('prepare', function () {
             });
         });
         it('<access> - sanity check - no wildcard but has NSAllowsArbitraryLoadsInWebContent, NSAllowsArbitraryLoadsForMedia, NSAllowsLocalNetworking', function (done) {
-
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<access origin="http://cordova.apache.org" allows-arbitrary-loads-in-web-content="true" allows-arbitrary-loads-in-media="true" allows-local-networking="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
+            let configXml = path.join(FIXTURES, 'prepare', 'NoWildcardForAllNS.xml');
+            let my_config = new IosConfigParser(configXml);
 
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -1169,14 +1126,8 @@ describe('prepare', function () {
         /// ///////////////////////////////////////////////
 
         it('<allow-navigation> - should handle wildcard', function (done) {
-
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<allow-navigation href="*" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
+            let configXml = path.join(FIXTURES, 'prepare', 'AllowNavigationWildcard.xml');
+            let my_config = new IosConfigParser(configXml);
 
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -1189,14 +1140,8 @@ describe('prepare', function () {
         });
 
         it('<allow-navigation> - sanity check - no wildcard but has NSAllowsArbitraryLoadsInWebContent, NSAllowsArbitraryLoadsForMedia, NSAllowsLocalNetworking', function (done) {
-
-            var readFile = spyOn(fs, 'readFileSync');
-            var configXml = '<?xml version="1.0" encoding="UTF-8"?><widget id="io.cordova.hellocordova" ios-CFBundleIdentifier="io.cordova.hellocordova.ios" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"><name>SampleApp</name>' +
-            '<allow-navigation href="http://cordova.apache.org" allows-arbitrary-loads-in-web-content="true" allows-arbitrary-loads-in-media="true" allows-local-networking="true" />' +
-            '</widget>';
-            readFile.and.returnValue(configXml);
-
-            var my_config = new ConfigParser('fake/path');
+            let configXml = path.join(FIXTURES, 'prepare', 'AllowNavigationNoWildcard.xml');
+            let my_config = new IosConfigParser(configXml);
 
             wrapper(updateProject(my_config, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -1589,7 +1534,7 @@ describe('prepare', function () {
             });
         });
         it('Test#020 : <name> - should write out the display name to info plist as CFBundleDisplayName', function (done) {
-            cfg.shortName = function () { return 'MyApp'; };
+            cfg.getShortName = function () { return 'MyApp'; };
             wrapper(updateProject(cfg, p.locations), done, function () {
                 expect(plist.build.calls.mostRecent().args[0].CFBundleDisplayName).toEqual('MyApp');
             });
@@ -1615,7 +1560,7 @@ describe('prepare', function () {
         const projectRoot = path.join(FIXTURES, 'resource-file-support');
         const updateFileResources = prepare.__get__('updateFileResources');
         const cleanFileResources = prepare.__get__('cleanFileResources');
-        const cfgResourceFiles = new ConfigParser(path.join(FIXTURES, 'resource-file-support', 'config.xml'));
+        const cfgResourceFiles = new IosConfigParser(path.join(FIXTURES, 'resource-file-support', 'config.xml'));
 
         function findImageFileRef (pbxproj, imageFileName) {
             const buildfiles = pbxproj.pbxBuildFileSection();
