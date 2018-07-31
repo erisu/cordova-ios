@@ -33,37 +33,10 @@ describe('IosConfigParser', () => {
         let cfg;
         beforeEach(() => { cfg = new ConfigParser(xml); });
 
-        describe('package name / ios-CFBundleIdentifier', () => {
-            it('Test 005 : should get the ios packagename', () => {
+        describe('ios_CFBundleIdentifier method', () => {
+            it('should get the ios packagename', () => {
                 expect(cfg.ios_CFBundleIdentifier()).toEqual('io.cordova.hellocordova.ios');
             });
         });
-
-        // describe('getStaticResources method', () => {
-        //     let hasPlatformPropertyDefined = function (e) { return !!e.platform; };
-        //     let hasSrcPropertyDefined = function (e) { return !!e.src; };
-        //     let hasTargetPropertyDefined = function (e) { return !!e.target; };
-
-        //     it('should parse resources\' attributes', () => {
-        //         expect(cfg.getStaticResources(null, 'icon').every(hasSrcPropertyDefined)).toBeTruthy();
-        //         expect(cfg.getStaticResources('windows', 'icon').filter(hasPlatformPropertyDefined).every(hasTargetPropertyDefined)).toBeTruthy();
-        //     });
-
-        //     it('Test 040 : should have getBySize method returning resource with size specified or null', () => {
-        //         expect(cfg.getStaticResources('windows', 'icon').getBySize(128)).toBe(null);
-        //         expect(cfg.getStaticResources('windows', 'icon').getBySize(72)).toBeDefined();
-        //         expect(cfg.getStaticResources('windows', 'icon').getBySize(72).width).toBe(72);
-        //         expect(cfg.getStaticResources('windows', 'icon').getBySize(null, 48)).toBeDefined();
-        //         expect(cfg.getStaticResources('windows', 'icon').getBySize(null, 48).height).toBe(48);
-        //     });
-        // });
-
-        // describe('getFileResources method', () => {
-        //     let hasArchPropertyDefined = function (e) { return !!e.arch; };
-
-        //     it('should parse resources\' attributes', () => {
-        //         expect(cfg.getFileResources('windows').every(hasArchPropertyDefined)).toBeTruthy();
-        //     });
-        // });
     });
 });

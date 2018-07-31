@@ -21,7 +21,7 @@ var path = require('path');
 var fs = require('fs');
 var shell = require('shelljs');
 var EventEmitter = require('events').EventEmitter;
-var ConfigParser = require('cordova-common').ConfigParser;
+const IosConfigParser = require('../../../bin/templates/scripts/cordova/lib/config/IosConfigParser');
 var PluginInfo = require('cordova-common').PluginInfo;
 var Api = require('../../../bin/templates/scripts/cordova/Api');
 
@@ -35,7 +35,7 @@ var dummyPlugin = path.join(FIXTURES, DUMMY_PLUGIN);
 
 shell.config.silent = true;
 
-describe('prepare after plugin add', function () {
+fdescribe('prepare after plugin add', function () {
     var api;
     beforeEach(function () {
         shell.mkdir('-p', iosPlatform);
@@ -75,7 +75,7 @@ describe('prepare after plugin add', function () {
     it('Test 001 : should not overwrite plugin metadata added by "addPlugin"', function (done) {
         var project = {
             root: iosProject,
-            projectConfig: new ConfigParser(path.join(iosProject, 'config.xml')),
+            projectConfig: new IosConfigParser(path.join(iosProject, 'config.xml')),
             locations: {
                 plugins: path.join(iosProject, 'plugins'),
                 www: path.join(iosProject, 'www')

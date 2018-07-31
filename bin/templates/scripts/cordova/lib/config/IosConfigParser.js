@@ -17,11 +17,11 @@
     under the License.
 */
 
-const ConfigParser = require('cordova-common').ConfigParser;
+let ConfigParser = require('cordova-common').ConfigParser;
 
 class IosConfigParser extends ConfigParser {
-    constructor () {
-        super();
+    constructor (path) {
+        super(path);
 
         this.platform = 'ios';
     }
@@ -36,9 +36,3 @@ class IosConfigParser extends ConfigParser {
 }
 
 module.exports = IosConfigParser;
-
-// class WindowsConfigParser extends ConfigParser {
-//     windows_packageVersion () {
-//         return this.getAttribute('windows-packageVersion');
-//     }
-// }
