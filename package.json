@@ -51,9 +51,10 @@
   },
   "engineStrict": true,
   "dependencies": {
-    "cordova-common": "2.1.0",
+    "cordova-common": "github:erisu/cordova-common#2f5ae8e6cbcd7695c0d812f9f3407e32bd7d186f",
     "ios-sim": "^6.1.2",
     "nopt": "^3.0.6",
+    "osenv": "^0.1.5",
     "plist": "^1.2.0",
     "q": "^1.4.1",
     "shelljs": "^0.5.3",
