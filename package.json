@@ -50,7 +50,7 @@
   },
   "engineStrict": true,
   "dependencies": {
-    "cordova-common": "git+ssh://git@github.com/erisu/cordova-common.git#config-split",
+    "cordova-common": "github:erisu/cordova-common#config-split",
     "ios-sim": "^6.1.2",
     "nopt": "^3.0.6",
     "plist": "^1.2.0",
