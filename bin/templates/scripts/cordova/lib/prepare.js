@@ -193,7 +193,7 @@ function updateProject (platformConfig, locations) {
     var name = unorm.nfd(platformConfig.name());
     var pkg = platformConfig.getAttribute('ios-CFBundleIdentifier') || platformConfig.packageName();
     var version = platformConfig.version();
-    var displayName = platformConfig.shortName && platformConfig.shortName();
+    var displayName = platformConfig.getShortName && platformConfig.getShortName();
 
     var originalName = path.basename(locations.xcodeCordovaProj);
 

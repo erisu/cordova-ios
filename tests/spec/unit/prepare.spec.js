@@ -1501,7 +1501,7 @@ describe('prepare', function () {
             });
         });
         it('Test#020 : <name> - should write out the display name to info plist as CFBundleDisplayName', function (done) {
-            cfg.shortName = function () { return 'MyApp'; };
+            cfg.getShortName = function () { return 'MyApp'; };
             wrapper(updateProject(cfg, p.locations), done, function () {
                 expect(plist.build.calls.mostRecent().args[0].CFBundleDisplayName).toEqual('MyApp');
             });

@@ -35,7 +35,7 @@ var dummyPlugin = path.join(FIXTURES, DUMMY_PLUGIN);
 
 shell.config.silent = true;
 
-fdescribe('prepare after plugin add', function () {
+describe('prepare after plugin add', function () {
     var api;
     beforeEach(function () {
         shell.mkdir('-p', iosPlatform);
@@ -88,20 +88,20 @@ fdescribe('prepare after plugin add', function () {
             });
 
         api.prepare(project, {})
-            .then(function () {
+            .then(() => {
                 expect(fs.existsSync(path.join(iosPlatform, 'ios.json'))).toBe(true);
                 expect(DUMMY_PLUGIN).not.toBeInstalledIn(iosProject);
                 return api.addPlugin(new PluginInfo(dummyPlugin), {});
             })
-            .then(function () {
+            .then(() => {
                 expect(DUMMY_PLUGIN).toBeInstalledIn(iosPlatform);
                 return api.prepare(project, {});
             })
-            .then(function () {
+            .then(() => {
                 expect(DUMMY_PLUGIN).toBeInstalledIn(iosPlatform);
             })
             .catch(fail)
-            .finally(function () {
+            .finally(() => {
                 expect(fail).not.toHaveBeenCalled();
                 done();
             });
