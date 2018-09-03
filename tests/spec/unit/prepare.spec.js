@@ -264,23 +264,24 @@ describe('prepare', function () {
         });
 
         describe('#platformHasLaunchStoryboardImages', function () {
-            var platformHasLaunchStoryboardImages = prepare.__get__('platformHasLaunchStoryboardImages');
-            var cfgs = ['none', 'legacy-only', 'modern-only', 'modern-and-legacy'].reduce(function (p, c) {
-                p[c] = new IosConfigParser(path.join(FIXTURES, 'launch-storyboard-support', 'configs', c + '.xml'));
-                return p;
-            }, {});
+            const platformHasLaunchStoryboardImages = prepare.__get__('platformHasLaunchStoryboardImages');
+            const configDir = path.join(FIXTURES, 'launch-storyboard-support', 'configs');
+            const createParser = (config) => new IosConfigParser(path.join(configDir, `${config}.xml`));
 
-            it('should be false with no launch images', function () {
-                expect(platformHasLaunchStoryboardImages(cfgs.none)).toEqual(false);
+            it('should be false with no launch images', () => {
+                expect(platformHasLaunchStoryboardImages(createParser('none'))).toEqual(false);
             });
-            it('should be false with only legacy images', function () {
-                expect(platformHasLaunchStoryboardImages(cfgs['legacy-only'])).toEqual(false);
+
+            it('should be false with only legacy images', () => {
+                expect(platformHasLaunchStoryboardImages(createParser('legacy-only'))).toEqual(false);
             });
-            it('should be true with typical launch storyboard images', function () {
-                expect(platformHasLaunchStoryboardImages(cfgs['modern-only'])).toEqual(true);
+
+            it('should be true with typical launch storyboard images', () => {
+                expect(platformHasLaunchStoryboardImages(createParser('modern-only'))).toEqual(true);
             });
-            it('should be true with typical and legacy launch storyboard images', function () {
-                expect(platformHasLaunchStoryboardImages(cfgs['modern-and-legacy'])).toEqual(true);
+
+            it('should be true with typical and legacy launch storyboard images', () => {
+                expect(platformHasLaunchStoryboardImages(createParser('modern-and-legacy'))).toEqual(true);
             });
         });
 
@@ -574,31 +575,31 @@ describe('prepare', function () {
                 update_name = spyOn(xc, 'updateProductName').and.callThrough();
                 return xc;
             });
-            cfg.name = function () { return 'SampleApp'; }; // this is to match p's original project name (based on .xcodeproj)
-            cfg.packageName = function () { return 'testpkg'; };
-            cfg.version = function () { return 'one point oh'; };
+            cfg.getName = function () { return 'SampleApp'; }; // this is to match p's original project name (based on .xcodeproj)
+            cfg.getPackageName = function () { return 'testpkg'; };
+            cfg.getVersion = function () { return 'one point oh'; };
 
             spyOn(cfg, 'getPreference');
         });
 
         it('Test#001 : should not update the app name in pbxproj', function (done) {
-            var cfg2OriginalName = cfg2.name;
+            var cfg2OriginalName = cfg2.getName;
 
             // originalName here will be `SampleApp` (based on the xcodeproj basename) from p
-            cfg2.name = function () { return 'NotSampleApp'; }; // new config has name change
+            cfg2.getName = function () { return 'NotSampleApp'; }; // new config has name change
             wrapperError(updateProject(cfg2, p.locations), done); // since the name has changed it *should* error
 
             // originalName here will be `SampleApp` (based on the xcodeproj basename) from p
-            cfg2.name = function () { return 'SampleApp'; }; // new config does *not* have a name change
+            cfg2.getName = function () { return 'SampleApp'; }; // new config does *not* have a name change
             wrapper(updateProject(cfg2, p.locations), done); // since the name has not changed it *should not* error
 
             // restore cfg2 original name
-            cfg2.name = cfg2OriginalName;
+            cfg2.getName = cfg2OriginalName;
         });
 
         it('should write target-device preference', function (done) {
-            var cfg2OriginalName = cfg2.name;
-            cfg2.name = function () { return 'SampleApp'; }; // new config does *not* have a name change
+            var cfg2OriginalName = cfg2.getName;
+            cfg2.getName = function () { return 'SampleApp'; }; // new config does *not* have a name change
             writeFileSyncSpy.and.callThrough();
 
             wrapper(updateProject(cfg2, p.locations), done, function () {
@@ -609,12 +610,12 @@ describe('prepare', function () {
                 expect(prop).toEqual('"1"'); // 1 is handset
 
                 // restore cfg2 original name
-                cfg2.name = cfg2OriginalName;
+                cfg2.getName = cfg2OriginalName;
             });
         });
         it('should write deployment-target preference', function (done) {
-            var cfg2OriginalName = cfg2.name;
-            cfg2.name = function () { return 'SampleApp'; }; // new config does *not* have a name change
+            var cfg2OriginalName = cfg2.getName;
+            cfg2.getName = function () { return 'SampleApp'; }; // new config does *not* have a name change
             writeFileSyncSpy.and.callThrough();
 
             wrapper(updateProject(cfg2, p.locations), done, function () {
@@ -625,12 +626,12 @@ describe('prepare', function () {
                 expect(prop).toEqual('8.0');
 
                 // restore cfg2 original name
-                cfg2.name = cfg2OriginalName;
+                cfg2.getName = cfg2OriginalName;
             });
         });
         it('should write SwiftVersion preference (4.1)', function (done) {
-            var cfg3OriginalName = cfg3.name;
-            cfg3.name = function () { return 'SampleApp'; }; // new config does *not* have a name change
+            var cfg3OriginalName = cfg3.getName;
+            cfg3.getName = function () { return 'SampleApp'; }; // new config does *not* have a name change
             writeFileSyncSpy.and.callThrough();
             wrapper(updateProject(cfg3, p.locations), done, function () {
                 var xcode = require('xcode');
@@ -640,12 +641,12 @@ describe('prepare', function () {
                 expect(prop).toEqual('4.1');
 
                 // restore cfg2 original name
-                cfg3.name = cfg3OriginalName;
+                cfg3.getName = cfg3OriginalName;
             });
         });
         it('should write SwiftVersion preference (3.3)', function (done) {
-            var cfg3OriginalName = cfg3.name;
-            cfg3.name = function () { return 'SampleApp'; }; // new config does *not* have a name change
+            var cfg3OriginalName = cfg3.getName;
+            cfg3.getName = function () { return 'SampleApp'; }; // new config does *not* have a name change
             var pref = cfg3.doc.findall('platform[@name=\'ios\']/preference').filter(function (elem) {
                 return elem.attrib.name.toLowerCase() === 'swiftversion';
             })[0];
@@ -659,7 +660,7 @@ describe('prepare', function () {
                 var prop = proj.getBuildProperty('SWIFT_VERSION');
                 expect(prop).toEqual('3.3');
                 // restore cfg2 original name
-                cfg3.name = cfg3OriginalName;
+                cfg3.getName = cfg3OriginalName;
                 pref.attrib.value = prefOriginalSwiftVersion;
             });
         });
@@ -1098,11 +1099,11 @@ describe('prepare', function () {
         });
         /// ///////////////////////////////////////////////
         it('Test#016 : <access>, <allow-navigation> - http and https, no clobber', function (done) {
-            var cfg2OriginalName = cfg2.name;
+            var cfg2OriginalName = cfg2.getName;
             // original name here is 'SampleApp' based on p
             // we are not testing a name change here, but testing a new config being used (name change test is above)
             // so we set it to the name expected
-            cfg2.name = function () { return 'SampleApp'; }; // new config does *not* have a name change
+            cfg2.getName = function () { return 'SampleApp'; }; // new config does *not* have a name change
 
             wrapper(updateProject(cfg2, p.locations), done, function () {
                 var ats = plist.build.calls.mostRecent().args[0].NSAppTransportSecurity;
@@ -1120,7 +1121,7 @@ describe('prepare', function () {
                 expect(d.NSRequiresCertificateTransparency).toEqual(undefined);
 
                 // restore cfg2 original name
-                cfg2.name = cfg2OriginalName;
+                cfg2.getName = cfg2OriginalName;
             });
         });
         /// ///////////////////////////////////////////////

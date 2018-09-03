@@ -190,9 +190,9 @@ function updateProject (platformConfig, locations) {
     // CB-6992 it is necessary to normalize characters
     // because node and shell scripts handles unicode symbols differently
     // We need to normalize the name to NFD form since iOS uses NFD unicode form
-    var name = unorm.nfd(platformConfig.name());
-    var pkg = platformConfig.getAttribute('ios-CFBundleIdentifier') || platformConfig.packageName();
-    var version = platformConfig.version();
+    var name = unorm.nfd(platformConfig.getName());
+    var pkg = platformConfig.getAttribute('ios-CFBundleIdentifier') || platformConfig.getPackageName();
+    var version = platformConfig.getVersion();
     var displayName = platformConfig.getShortName && platformConfig.getShortName();
 
     var originalName = path.basename(locations.xcodeCordovaProj);
@@ -376,7 +376,7 @@ function getIconsDir (projectRoot, platformProjDir) {
 }
 
 function updateIcons (cordovaProject, locations) {
-    var icons = cordovaProject.projectConfig.getIcons('ios');
+    var icons = cordovaProject.projectConfig.getIcons();
 
     if (icons.length === 0) {
         events.emit('verbose', 'This app does not have icons defined');
@@ -392,7 +392,7 @@ function updateIcons (cordovaProject, locations) {
 }
 
 function cleanIcons (projectRoot, projectConfig, locations) {
-    var icons = projectConfig.getIcons('ios');
+    var icons = projectConfig.getIcons();
     if (icons.length > 0) {
         var platformProjDir = path.relative(projectRoot, locations.xcodeCordovaProj);
         var iconsDir = getIconsDir(projectRoot, platformProjDir);
@@ -449,7 +449,7 @@ function getSplashScreensDir (projectRoot, platformProjDir) {
 }
 
 function updateSplashScreens (cordovaProject, locations) {
-    var splashScreens = cordovaProject.projectConfig.getSplashScreens('ios');
+    var splashScreens = cordovaProject.projectConfig.getSplashScreens();
 
     if (splashScreens.length === 0) {
         events.emit('verbose', 'This app does not have splash screens defined');
@@ -465,7 +465,7 @@ function updateSplashScreens (cordovaProject, locations) {
 }
 
 function cleanSplashScreens (projectRoot, projectConfig, locations) {
-    var splashScreens = projectConfig.getSplashScreens('ios');
+    var splashScreens = projectConfig.getSplashScreens();
     if (splashScreens.length > 0) {
         var platformProjDir = path.relative(projectRoot, locations.xcodeCordovaProj);
         var splashScreensDir = getSplashScreensDir(projectRoot, platformProjDir);
@@ -773,13 +773,13 @@ function splashScreensHaveLaunchStoryboardImages (contentsJSON) {
 }
 
 function platformHasLaunchStoryboardImages (platformConfig) {
-    var splashScreens = platformConfig.getSplashScreens('ios');
+    var splashScreens = platformConfig.getSplashScreens();
     var contentsJSON = getLaunchStoryboardContentsJSON(splashScreens, ''); // note: we don't need a file path here; we're just counting
     return splashScreensHaveLaunchStoryboardImages(contentsJSON);
 }
 
 function platformHasLegacyLaunchImages (platformConfig) {
-    var splashScreens = platformConfig.getSplashScreens('ios');
+    var splashScreens = platformConfig.getSplashScreens();
     return !!splashScreens.reduce(function (p, c) {
         return (c.width !== undefined || c.height !== undefined) ? c : p;
     }, undefined);
@@ -847,7 +847,7 @@ function getLaunchStoryboardImagesDir (projectRoot, platformProjDir) {
  * @param  {Object} locations          A dictionary containing useful location paths
  */
 function updateLaunchStoryboardImages (cordovaProject, locations) {
-    var splashScreens = cordovaProject.projectConfig.getSplashScreens('ios');
+    var splashScreens = cordovaProject.projectConfig.getSplashScreens();
     var platformProjDir = path.relative(cordovaProject.root, locations.xcodeCordovaProj);
     var launchStoryboardImagesDir = getLaunchStoryboardImagesDir(cordovaProject.root, platformProjDir);
 
@@ -874,7 +874,7 @@ function updateLaunchStoryboardImages (cordovaProject, locations) {
  * @param  {Object} locations          A dictionary containing useful location paths
  */
 function cleanLaunchStoryboardImages (projectRoot, projectConfig, locations) {
-    var splashScreens = projectConfig.getSplashScreens('ios');
+    var splashScreens = projectConfig.getSplashScreens();
     var platformProjDir = path.relative(projectRoot, locations.xcodeCordovaProj);
     var launchStoryboardImagesDir = getLaunchStoryboardImagesDir(projectRoot, platformProjDir);
     if (launchStoryboardImagesDir) {
