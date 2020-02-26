@@ -254,7 +254,7 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
     return PluginManager.get(this.platform, this.locations, xcodeproj)
         .addPlugin(plugin, installOptions)
         .then(() => {
-            if (plugin != null) {
+            if (plugin !== null) {
                 const headerTags = plugin.getHeaderFiles(this.platform);
                 const bridgingHeaders = headerTags.filter(obj => obj.type === 'BridgingHeader');
                 if (bridgingHeaders.length > 0) {
@@ -272,11 +272,9 @@ Api.prototype.addPlugin = function (plugin, installOptions) {
             }
         })
         .then(() => {
-            if (plugin != null) {
+            if (plugin !== null) {
                 const podSpecs = plugin.getPodSpecs ? plugin.getPodSpecs(this.platform) : [];
-                const frameworkTags = plugin.getFrameworks(this.platform);
-                const frameworkPods = frameworkTags.filter(obj => obj.type === 'podspec');
-                return this.addPodSpecs(plugin, podSpecs, frameworkPods, installOptions);
+                return this.addPodSpecs(plugin, podSpecs, installOptions);
             }
         })
         // CB-11022 return non-falsy value to indicate
@@ -303,7 +301,7 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
     return PluginManager.get(this.platform, this.locations, xcodeproj)
         .removePlugin(plugin, uninstallOptions)
         .then(() => {
-            if (plugin != null) {
+            if (plugin !== null) {
                 const headerTags = plugin.getHeaderFiles(this.platform);
                 const bridgingHeaders = headerTags.filter(obj => obj.type === 'BridgingHeader');
                 if (bridgingHeaders.length > 0) {
@@ -321,11 +319,9 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
             }
         })
         .then(() => {
-            if (plugin != null) {
+            if (plugin !== null) {
                 const podSpecs = plugin.getPodSpecs ? plugin.getPodSpecs(this.platform) : [];
-                const frameworkTags = plugin.getFrameworks(this.platform);
-                const frameworkPods = frameworkTags.filter(obj => obj.type === 'podspec');
-                return this.removePodSpecs(plugin, podSpecs, frameworkPods, uninstallOptions);
+                return this.removePodSpecs(plugin, podSpecs, uninstallOptions);
             }
         })
         // CB-11022 return non-falsy value to indicate
@@ -339,11 +335,10 @@ Api.prototype.removePlugin = function (plugin, uninstallOptions) {
  * @param  {PluginInfo}  plugin  A PluginInfo instance that represents plugin
  *   that will be installed.
  * @param  {Object}  podSpecs: the return value of plugin.getPodSpecs(this.platform)
- * @param  {Object}  frameworkPods: framework tags object with type === 'podspec'
  * @return  {Promise}  Return a promise
  */
 
-Api.prototype.addPodSpecs = function (plugin, podSpecs, frameworkPods, installOptions) {
+Api.prototype.addPodSpecs = function (plugin, podSpecs, installOptions) {
     const project_dir = this.locations.root;
     const project_name = this.locations.xcodeCordovaProj.split('/').pop();
     const minDeploymentTarget = this.getPlatformInfo().projectConfig.getPreference('deployment-target', 'ios');
@@ -406,34 +401,7 @@ Api.prototype.addPodSpecs = function (plugin, podSpecs, frameworkPods, installOp
         });
     }
 
-    if (frameworkPods.length) {
-        events.emit('warn', '"framework" tag with type "podspec" is deprecated and will be removed. Please use the "podspec" tag.');
-        events.emit('verbose', 'Adding pods since the plugin contained <framework>(s) with type="podspec"');
-        frameworkPods.forEach(obj => {
-            const spec = getVariableSpec(obj.spec, installOptions);
-            const podJson = {
-                name: obj.src,
-                type: obj.type,
-                spec
-            };
-
-            const val = podsjsonFile.getLibrary(podJson.name);
-            if (val) { // found
-                if (podJson.spec !== val.spec) { // exists, different spec, print warning
-                    events.emit('warn', `${plugin.id} depends on ${podJson.name}@${podJson.spec}, which conflicts with another plugin. ${podJson.name}@${val.spec} is already installed and was not overwritten.`);
-                }
-                // increment count, but don't add in Podfile because it already exists
-                podsjsonFile.incrementLibrary(podJson.name);
-            } else { // not found, write new
-                podJson.count = 1;
-                podsjsonFile.setJsonLibrary(podJson.name, podJson);
-                // add to Podfile
-                podfileFile.addSpec(podJson.name, podJson.spec);
-            }
-        });
-    }
-
-    if (podSpecs.length > 0 || frameworkPods.length > 0) {
+    if (podSpecs.length > 0) {
         // now that all the pods have been processed, write to pods.json
         podsjsonFile.write();
 
@@ -458,11 +426,10 @@ Api.prototype.addPodSpecs = function (plugin, podSpecs, frameworkPods, installOp
  * @param  {PluginInfo}  plugin  A PluginInfo instance that represents plugin
  *   that will be installed.
  * @param  {Object}  podSpecs: the return value of plugin.getPodSpecs(this.platform)
- * @param  {Object}  frameworkPods: framework tags object with type === 'podspec'
  * @return  {Promise}  Return a promise
  */
 
-Api.prototype.removePodSpecs = function (plugin, podSpecs, frameworkPods, uninstallOptions) {
+Api.prototype.removePodSpecs = function (plugin, podSpecs, uninstallOptions) {
     const project_dir = this.locations.root;
     const project_name = this.locations.xcodeCordovaProj.split('/').pop();
 
@@ -529,31 +496,7 @@ Api.prototype.removePodSpecs = function (plugin, podSpecs, frameworkPods, uninst
         });
     }
 
-    if (frameworkPods.length) {
-        events.emit('warn', '"framework" tag with type "podspec" is deprecated and will be removed. Please use the "podspec" tag.');
-        events.emit('verbose', 'Adding pods since the plugin contained <framework>(s) with type=\"podspec\"'); /* eslint no-useless-escape : 0 */
-        frameworkPods.forEach(obj => {
-            const spec = getVariableSpec(obj.spec, uninstallOptions);
-            const podJson = {
-                name: obj.src,
-                type: obj.type,
-                spec
-            };
-
-            const val = podsjsonFile.getLibrary(podJson.name);
-            if (val) { // found, decrement count
-                podsjsonFile.decrementLibrary(podJson.name);
-            } else { // not found (perhaps a sync error)
-                const message = util.format('plugin \"%s\" podspec \"%s\" does not seem to be in pods.json, nothing to remove. Will attempt to remove from Podfile.', plugin.id, podJson.name); /* eslint no-useless-escape : 0 */
-                events.emit('verbose', message);
-            }
-
-            // always remove from the Podfile
-            podfileFile.removeSpec(podJson.name);
-        });
-    }
-
-    if (podSpecs.length > 0 || frameworkPods.length > 0) {
+    if (podSpecs.length > 0) {
         // now that all the pods have been processed, write to pods.json
         podsjsonFile.write();
 

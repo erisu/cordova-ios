@@ -98,7 +98,6 @@ describe('Platform Api', () => {
         describe('addPlugin', () => {
             const my_plugin = {
                 getHeaderFiles: function () { return []; },
-                getFrameworks: function () { return []; },
                 getPodSpecs: function () { return []; }
             };
             beforeEach(() => {
@@ -122,7 +121,6 @@ describe('Platform Api', () => {
                 };
                 beforeEach(() => {
                     bridgingHeader_mock = jasmine.createSpyObj('bridgingHeader mock', ['addHeader', 'write']);
-                    spyOn(my_plugin, 'getFrameworks').and.returnValue([]);
                     spyOn(my_plugin, 'getHeaderFiles').and.returnValue([my_bridgingHeader_json]);
                     BridgingHeader_mod.BridgingHeader.and.callFake(() => bridgingHeader_mock);
                 });
@@ -168,7 +166,6 @@ describe('Platform Api', () => {
                         'incrementLibrary', 'incrementSource', 'incrementDeclaration', 'write',
                         'setJsonLibrary', 'setJsonSource', 'setJsonDeclaration']);
                     podfile_mock = jasmine.createSpyObj('podfile mock', ['isDirty', 'addSpec', 'addSource', 'addDeclaration', 'write', 'install']);
-                    spyOn(my_plugin, 'getFrameworks').and.returnValue([]);
                     spyOn(my_plugin, 'getPodSpecs').and.returnValue([my_pod_json]);
                     PodsJson_mod.PodsJson.and.callFake(() => podsjson_mock);
                     Podfile_mod.Podfile.and.callFake(() => podfile_mock);
@@ -287,75 +284,10 @@ describe('Platform Api', () => {
                         });
                 });
             });
-            describe('with frameworks of `podspec` type', () => {
-                let podsjson_mock;
-                let podfile_mock;
-                const my_pod_json = {
-                    type: 'podspec',
-                    src: 'podsource!',
-                    spec: 'podspec!'
-                };
-                beforeEach(() => {
-                    podsjson_mock = jasmine.createSpyObj('podsjson mock', ['getLibrary', 'incrementLibrary', 'write', 'setJsonLibrary']);
-                    podfile_mock = jasmine.createSpyObj('podfile mock', ['isDirty', 'addSpec', 'write', 'install']);
-                    spyOn(my_plugin, 'getFrameworks').and.returnValue([my_pod_json]);
-                    PodsJson_mod.PodsJson.and.callFake(() => podsjson_mock);
-                    Podfile_mod.Podfile.and.callFake(() => podfile_mock);
-                });
-                // TODO: a little help with clearly labeling / describing the tests below? :(
-                it('should warn if Pods JSON contains name/src but differs in spec', () => {
-                    podsjson_mock.getLibrary.and.returnValue({
-                        spec: `something different from ${my_pod_json.spec}`
-                    });
-                    spyOn(events, 'emit');
-                    return api.addPlugin(my_plugin)
-                        .then(() => {
-                            expect(events.emit).toHaveBeenCalledWith('warn', jasmine.stringMatching(/which conflicts with another plugin/g));
-                        });
-                });
-                it('should increment Pods JSON file if pod name/src already exists in file', () => {
-                    podsjson_mock.getLibrary.and.returnValue({
-                        spec: my_pod_json.spec
-                    });
-                    return api.addPlugin(my_plugin)
-                        .then(() => {
-                            expect(podsjson_mock.incrementLibrary).toHaveBeenCalledWith('podsource!');
-                        });
-                });
-                it('on a new framework/pod name/src/key, it should add a new json to podsjson and add a new spec to podfile', () => {
-                    return api.addPlugin(my_plugin)
-                        .then(() => {
-                            expect(podsjson_mock.setJsonLibrary).toHaveBeenCalledWith(my_pod_json.src, jasmine.any(Object));
-                            expect(podfile_mock.addSpec).toHaveBeenCalledWith(my_pod_json.src, my_pod_json.spec);
-                        });
-                });
-                it('should write out podfile and install if podfile was changed', () => {
-                    podfile_mock.isDirty.and.returnValue(true);
-                    podfile_mock.install.and.returnValue({ then: function () { } });
-                    return api.addPlugin(my_plugin)
-                        .then(() => {
-                            expect(podfile_mock.write).toHaveBeenCalled();
-                            expect(podfile_mock.install).toHaveBeenCalled();
-                        });
-                });
-                it('if two frameworks with the same name are added, should honour the spec of the first-installed plugin', () => {
-                    podsjson_mock.getLibrary.and.returnValue({
-                        spec: `something different from ${my_pod_json.spec}`
-                    });
-                    return api.addPlugin(my_plugin)
-                        .then(() => {
-                            // Increment will non-destructively set the spec to keep it as it was...
-                            expect(podsjson_mock.incrementLibrary).toHaveBeenCalledWith(my_pod_json.src);
-                            // ...whereas setJson would overwrite it completely.
-                            expect(podsjson_mock.setJsonLibrary).not.toHaveBeenCalled();
-                        });
-                });
-            });
         });
         describe('removePlugin', () => {
             const my_plugin = {
                 getHeaderFiles: function () { return []; },
-                getFrameworks: function () {},
                 getPodSpecs: function () { return []; }
             };
             beforeEach(() => {
@@ -399,7 +331,6 @@ describe('Platform Api', () => {
                         'decrementLibrary', 'decrementSource', 'decrementDeclaration', 'write',
                         'setJsonLibrary', 'setJsonSource', 'setJsonDeclaration']);
                     podfile_mock = jasmine.createSpyObj('podfile mock', ['isDirty', 'removeSpec', 'removeSource', 'removeDeclaration', 'write', 'install']);
-                    spyOn(my_plugin, 'getFrameworks').and.returnValue([]);
                     spyOn(my_plugin, 'getPodSpecs').and.returnValue([my_pod_json]);
                     PodsJson_mod.PodsJson.and.callFake(() => podsjson_mock);
                     Podfile_mod.Podfile.and.callFake(() => podfile_mock);
