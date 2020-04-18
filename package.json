@@ -44,7 +44,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "cordova-common": "^3.1.0",
+    "cordova-common": "github:apache/cordova-common#4901a24fac3d47b698d482ef04ea9580e1dca88d",
     "fs-extra": "^9.0.0",
     "ios-sim": "^9.0.0",
     "nopt": "^4.0.3",
