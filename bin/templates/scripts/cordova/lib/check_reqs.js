@@ -21,6 +21,7 @@
 
 const Q = require('q');
 const shell = require('shelljs');
+const which = require('which');
 const util = require('util');
 const versions = require('./versions');
 
@@ -152,7 +153,7 @@ function checkTool (tool, minVersion, message, toolFriendlyName) {
     toolFriendlyName = toolFriendlyName || tool;
 
     // Check whether tool command is available at all
-    const tool_command = shell.which(tool);
+    const tool_command = which.sync(tool, { nothrow: true });
     if (!tool_command) {
         return Q.reject(`${toolFriendlyName} was not found. ${message || ''}`);
     }
