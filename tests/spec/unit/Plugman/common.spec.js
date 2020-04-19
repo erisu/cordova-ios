@@ -99,7 +99,7 @@ describe('common handler routines', () => {
             copyFile(test_dir, srcFile, project_dir, dest);
 
             expect(s).toHaveBeenCalled();
-            expect(s).toHaveBeenCalledWith(path.dirname(resolvedDest));
+            expect(s).toHaveBeenCalledWith('-p', path.dirname(resolvedDest));
             fs.removeSync(project_dir);
         });
 
