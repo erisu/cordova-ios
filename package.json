@@ -29,7 +29,9 @@
     "xcodebuild": "xcodebuild -quiet test -workspace tests/cordova-ios.xcworkspace -destination \"platform=iOS Simulator,name=iPhone 8\" CONFIGURATION_BUILD_DIR=\"`mktemp -d 2>/dev/null || mktemp -d -t 'cordova-ios'`\"",
     "preobjc-tests": "tests/scripts/killsim.js",
     "unit-tests": "jasmine --config=tests/spec/unit.json",
-    "lint": "eslint . \"bin/**/!(*.*)\""
+    "lint": "eslint . \"bin/**/!(*.*)\"",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "Apache Software Foundation",
   "license": "Apache-2.0",
@@ -53,7 +55,8 @@
     "shelljs": "^0.5.3",
     "unorm": "^1.6.0",
     "xcode": "^3.0.1",
-    "xml-escape": "^1.1.0"
+    "xml-escape": "^1.1.0",
+    "snyk": "^1.321.0"
   },
   "nyc": {
     "include": [
@@ -63,5 +66,6 @@
       "lcov",
       "text"
     ]
-  }
+  },
+  "snyk": true
 }
