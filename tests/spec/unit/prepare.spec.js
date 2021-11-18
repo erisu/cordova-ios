@@ -42,7 +42,7 @@ describe('prepare', () => {
     let p;
     let Api;
     beforeEach(() => {
-        Api = rewire('../../../bin/templates/scripts/cordova/Api');
+        Api = rewire('../../../lib/Api');
 
         fs.ensureDirSync(iosPlatform);
         fs.copySync(iosProjectFixture, iosPlatform);
