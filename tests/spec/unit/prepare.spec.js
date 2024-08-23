@@ -570,7 +570,7 @@ describe('prepare', () => {
             beforeEach(() => {
                 prepare.__set__('ASSUMED_XCODE_VERSION', '15.0.0');
 
-                const platformProjDir = path.relative(iosProject, p.locations.xcodeCordovaProj);
+                const platformProjDir = path.relative(iosProject, p.locations.appDir);
                 iconsDir = path.join(platformProjDir, 'Assets.xcassets', 'AppIcon.appiconset');
             });
 
@@ -694,7 +694,7 @@ describe('prepare', () => {
             let iconsDir = '';
 
             beforeEach(() => {
-                const platformProjDir = path.relative(iosProject, p.locations.xcodeCordovaProj);
+                const platformProjDir = path.relative(iosProject, p.locations.appDir);
                 iconsDir = path.join(platformProjDir, 'Assets.xcassets', 'AppIcon.appiconset');
             });
 
