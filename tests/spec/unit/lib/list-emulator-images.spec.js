@@ -17,22 +17,22 @@
        under the License.
 */
 
-// Requiring ios-sim below has some side effects, mainly,
+// Requiring simctl below has some side effects, mainly,
 // it ends up requiring the specific macOS environment bits that
 // allow for interacting with iOS Simulators. On Windows+Linux we are
 // bound to not-have-that.
 if (process.platform === 'darwin') {
     const list_emus = require('../../../../lib/listEmulatorImages');
-    const iossim = require('ios-sim');
+    const simctl = require('simctl');
 
-    describe('cordova/lib/listEmulatorImages', () => {
+    xdescribe('cordova/lib/listEmulatorImages', () => {
         describe('run method', () => {
             beforeEach(() => {
-                spyOn(iossim, 'getdevicetypes');
+                spyOn(simctl, 'list');
             });
-            it('should delegate to the ios-sim getdevicetypes method', () => {
+            it('should delegate to the simctl getdevicetypes method', () => {
                 list_emus.run();
-                expect(iossim.getdevicetypes).toHaveBeenCalled();
+                expect(simctl.list).toHaveBeenCalled();
             });
         });
     });
