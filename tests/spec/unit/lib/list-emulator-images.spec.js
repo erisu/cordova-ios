@@ -30,7 +30,7 @@ if (process.platform === 'darwin') {
             beforeEach(() => {
                 spyOn(simctl, 'list');
             });
-            it('should delegate to the simctl getdevicetypes method', () => {
+            it('should delegate to the simctl list method', () => {
                 list_emus.run();
                 expect(simctl.list).toHaveBeenCalled();
             });
